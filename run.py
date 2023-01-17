@@ -3,7 +3,6 @@ import requests
 import bs4
 import time
 import re
-import creds
 
 start_time = time.time()
 
@@ -136,6 +135,14 @@ Func.write("""
 # Saving the data into the HTML file
 Func.close()
 
+print(fox_article_one_link)
+print(fox_article_two_link)
+print(fox_article_three_link)
+print(nyr_article_one_link)
+print(nyr_article_two_link)
+print(nyr_article_three_link)
+print(fox_top_words)
+print(nyr_top_words)
 print("Successful execution on {execution_time} with a duration of {execution_duration} seconds.".format(execution_time=time.ctime(), execution_duration=(time.time() - start_time)))
 
 #Total words in all 3 articles per media source
