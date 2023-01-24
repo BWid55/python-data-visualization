@@ -122,6 +122,14 @@ Func.write("""
 Func.close()
 
 #Print for crontab log file
+print(fox_article_links_list)
+print(nyr_article_links_list)
+print(fox_article_list)
+print(nyr_article_list)
+print(fox_word_tally)
+print(nyr_word_tally)
+print(fox_popular_words)
+print(nyr_popular_words)
 print("Successful execution on {execution_time} with a duration of {execution_duration} seconds.".format(execution_time=time.ctime(), execution_duration=(time.time() - start_time)))
 
 
