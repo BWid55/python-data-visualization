@@ -22,13 +22,16 @@ def remove_html_tags_and_sort_words(html,source):
             else:
                 fox_word_tally[word] = 1
 
-#Set asset containers and data
+#Set blank asset containers and utility data
 desired_number_of_words = 50
 words_to_not_use = ["", "\n", "no", "found", "such", "here", "also", "those", "because", "since", "just", "month", "week", "year", "months", "change", "first", "second", "third", "now", "new", "even", "me", "still", ",", ", ", "other", "fox", "new", "through", "told", "news", "per", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "us", "1", "2", "3", "4", "5", "6", "7", "8", "9", "after", "said", "more", "the", "at", "there", "some", "my", "of", "be", "use", "her", "than", "and", "this", "an", "would", "a", "have", "each", "to", "from", "which", "like", "been", "in", "or", "she", "him", "is", "do", "into", "who", "you", "had", "how", "that", "by", "their", "has", "its", "it's", "it", "if", "he", "but", "will", "find", "was", "not", "for", "what", "down", "on", "all", "about", "go", "day", "are", "were", "out", "see", "did", "as", "we", "many", "get", "with", "when", "then", "come", "came", "his", "your", "them", "they", "can", "these", "could", "i", "so"]
+
+fox_article_links_list = []
+nyr_article_links_list = []
 fox_word_tally = {}
 nyr_word_tally = {}
-fox_top_words = []
-nyr_top_words = []
+fox_popular_words = []
+nyr_popular_words = []
 
 #Retrieve top 3 Fox News news article links
 foxRes = requests.get('https://www.foxnews.com/')
@@ -60,7 +63,7 @@ nyr_article_two.raise_for_status()
 nyr_article_three = requests.get('https://www.newyorker.com' + nyr_article_three_link)
 nyr_article_three.raise_for_status()
 
-#Retrieve Fox News Text
+#Complete Tally of Fox News Text
 fox_article_one_text = bs4.BeautifulSoup(fox_article_one.text,'html.parser').select('.article-body')
 for element in fox_article_one_text:
     remove_html_tags_and_sort_words(element,'fox')
@@ -71,7 +74,7 @@ fox_article_three_text = bs4.BeautifulSoup(fox_article_three.text,'html.parser')
 for element in fox_article_three_text:
     remove_html_tags_and_sort_words(element,'fox')
 
-#Tally New Yorker Shown Text
+#Complete Tally of New Yorker Shown Text
 nyr_article_one_shown_text = bs4.BeautifulSoup(nyr_article_one.text,'html.parser').select('.has-dropcap.has-dropcap__lead-standard-heading')
 for element in nyr_article_one_shown_text:
     remove_html_tags_and_sort_words(element,'nyr')
@@ -81,7 +84,7 @@ for element in nyr_article_two_shown_text:
 nyr_article_three_shown_text = bs4.BeautifulSoup(nyr_article_three.text,'html.parser').select('.has-dropcap.has-dropcap__lead-standard-heading')
 for element in nyr_article_three_shown_text:
     remove_html_tags_and_sort_words(element,'nyr')
-#Tally New Yorker Paywall Text
+#Complete Tally of New Yorker Paywall Text
 nyr_article_one_paywall_text = bs4.BeautifulSoup(nyr_article_one.text,'html.parser').select('.paywall')
 for element in nyr_article_one_paywall_text:
     remove_html_tags_and_sort_words(element,'nyr')
@@ -92,23 +95,25 @@ nyr_article_three_paywall_text = bs4.BeautifulSoup(nyr_article_three.text,'html.
 for element in nyr_article_three_paywall_text:
     remove_html_tags_and_sort_words(element,'nyr')
 
-while len(fox_top_words) < desired_number_of_words:
+#Most Popular Words Tally for Fox News
+while len(fox_popular_words) < desired_number_of_words:
     if (max(fox_word_tally, key=fox_word_tally.get) in words_to_not_use):
         fox_word_tally.pop(max(fox_word_tally, key=fox_word_tally.get))
     else:
-        fox_top_words.append(max(fox_word_tally, key=fox_word_tally.get))
+        fox_popular_words.append(max(fox_word_tally, key=fox_word_tally.get))
         fox_word_tally.pop(max(fox_word_tally, key=fox_word_tally.get))
 
-while len(nyr_top_words) < desired_number_of_words:
+#Most Populars Words Tally for The New Yorker
+while len(nyr_popular_words) < desired_number_of_words:
     if (max(nyr_word_tally, key=nyr_word_tally.get) in words_to_not_use):
         nyr_word_tally.pop(max(nyr_word_tally, key=nyr_word_tally.get))
     else:
-        nyr_top_words.append(max(nyr_word_tally, key=nyr_word_tally.get))
+        nyr_popular_words.append(max(nyr_word_tally, key=nyr_word_tally.get))
         nyr_word_tally.pop(max(nyr_word_tally, key=nyr_word_tally.get))
 
-# Creating an HTML file
+#Creating an HTML file
 Func = open("/home/pi-guy/Scripts/py-pro/index.html","w")
-# Adding input data to the HTML file
+#Adding input data to the HTML file
 Func.write("""
 <!DOCTYPE html>
 <html lang="en">
@@ -121,28 +126,21 @@ Func.write("""
 <body>
     <h1>Stats</h1>
     <br>
-    <h2>Top 3 Fox News Words</h2>
+    <h2>3 Most Popular Fox News Words</h2>
     <p>They are {fox_first}, {fox_second}, and {fox_third}.<p>
     <br>
-    <h2>Top 3 The New Yorker Words</h2>
+    <h2>3 Most Popular The New Yorker Words</h2>
     <p>They are {nyr_first}, {nyr_second}, and {nyr_third}.<p>
     <br>
     <p>Last executed: {execution_time}</p>
     <p>Last execution duration: {execution_duration} seconds</p>
 </body>
 </html>
-""".format(fox_first=fox_top_words[0], fox_second=fox_top_words[1], fox_third=fox_top_words[2], nyr_first=nyr_top_words[0], nyr_second=nyr_top_words[1], nyr_third=nyr_top_words[2], execution_time=time.ctime(), execution_duration=(time.time() - start_time)))
-# Saving the data into the HTML file
+""".format(fox_first=fox_popular_words[0], fox_second=fox_popular_words[1], fox_third=fox_popular_words[2], nyr_first=nyr_popular_words[0], nyr_second=nyr_popular_words[1], nyr_third=nyr_popular_words[2], execution_time=time.ctime(), execution_duration=(time.time() - start_time)))
+#Saving the data into the HTML file
 Func.close()
 
-print(fox_article_one_link)
-print(fox_article_two_link)
-print(fox_article_three_link)
-print(nyr_article_one_link)
-print(nyr_article_two_link)
-print(nyr_article_three_link)
-print(fox_top_words)
-print(nyr_top_words)
+#Print for crontab log file
 print("Successful execution on {execution_time} with a duration of {execution_duration} seconds.".format(execution_time=time.ctime(), execution_duration=(time.time() - start_time)))
 
 #Total words in all 3 articles per media source
