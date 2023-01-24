@@ -138,4 +138,3 @@ print("Successful execution on {execution_time} with a duration of {execution_du
 #MORE IDEAS TO BUILD OUT PROJECT
 #Total words in all 3 articles per media source
 #Totals for top words for each media souce
-
