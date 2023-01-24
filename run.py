@@ -28,6 +28,8 @@ words_to_not_use = ["", "\n", "no", "found", "such", "here", "also", "those", "b
 
 fox_article_links_list = []
 nyr_article_links_list = []
+fox_article_list = []
+nyr_article_list = []
 fox_word_tally = {}
 nyr_word_tally = {}
 fox_popular_words = []
@@ -36,64 +38,43 @@ nyr_popular_words = []
 #Retrieve top 3 Fox News news article links
 foxRes = requests.get('https://www.foxnews.com/')
 foxRes.raise_for_status()
-fox_article_one_link = bs4.BeautifulSoup(foxRes.text,'html.parser').select('.main-content .story-1 > .info > .info-header > .title > a')[0].get('href')
-fox_article_two_link = bs4.BeautifulSoup(foxRes.text,'html.parser').select('.main-content .story-2 > .info > .info-header > .title > a')[0].get('href')
-fox_article_three_link = bs4.BeautifulSoup(foxRes.text,'html.parser').select('.main-content .story-3 > .info > .info-header > .title > a')[0].get('href')
+fox_article_links_list.append(bs4.BeautifulSoup(foxRes.text,'html.parser').select('.main-content .story-1 > .info > .info-header > .title > a')[0].get('href'))
+fox_article_links_list.append(bs4.BeautifulSoup(foxRes.text,'html.parser').select('.main-content .story-2 > .info > .info-header > .title > a')[0].get('href'))
+fox_article_links_list.append(bs4.BeautifulSoup(foxRes.text,'html.parser').select('.main-content .story-3 > .info > .info-header > .title > a')[0].get('href'))
 
 #Retrieve top 3 New Yorker news article links
 nyrRes = requests.get('https://www.newyorker.com/news')
 nyrRes.raise_for_status()
-nyr_article_one_link = bs4.BeautifulSoup(nyrRes.text,'html.parser').select('.Hero__heroWrapper___2CMSF > a')[0].get('href')
-nyr_article_two_link = bs4.BeautifulSoup(nyrRes.text,'html.parser').select('.River__riverItem___3huWr .Link__link___3dWao')[1].get('href')
-nyr_article_three_link = bs4.BeautifulSoup(nyrRes.text,'html.parser').select('.River__riverItem___3huWr')[1].select('a')[1].get('href')
+nyr_article_links_list.append(bs4.BeautifulSoup(nyrRes.text,'html.parser').select('.Hero__heroWrapper___2CMSF > a')[0].get('href'))
+nyr_article_links_list.append(bs4.BeautifulSoup(nyrRes.text,'html.parser').select('.River__riverItem___3huWr .Link__link___3dWao')[1].get('href'))
+nyr_article_links_list.append(bs4.BeautifulSoup(nyrRes.text,'html.parser').select('.River__riverItem___3huWr')[1].select('a')[1].get('href'))
 
 #Retrieve top 3 Fox News news articles
-fox_article_one = requests.get(fox_article_one_link)
-fox_article_one.raise_for_status()
-fox_article_two = requests.get(fox_article_two_link)
-fox_article_two.raise_for_status()
-fox_article_three = requests.get(fox_article_three_link)
-fox_article_three.raise_for_status()
+for link in fox_article_links_list:
+    article = requests.get(link)
+    article.raise_for_status()
+    fox_article_list.append(article)
 
 #Retrieve top 3 New Yorker news articles
-nyr_article_one = requests.get('https://www.newyorker.com' + nyr_article_one_link)
-nyr_article_one.raise_for_status()
-nyr_article_two = requests.get('https://www.newyorker.com' + nyr_article_two_link)
-nyr_article_two.raise_for_status()
-nyr_article_three = requests.get('https://www.newyorker.com' + nyr_article_three_link)
-nyr_article_three.raise_for_status()
+for link in nyr_article_links_list:
+    article = requests.get('https://www.newyorker.com' + link)
+    article.raise_for_status()
+    nyr_article_list.append(article)
 
 #Complete Tally of Fox News Text
-fox_article_one_text = bs4.BeautifulSoup(fox_article_one.text,'html.parser').select('.article-body')
-for element in fox_article_one_text:
-    remove_html_tags_and_sort_words(element,'fox')
-fox_article_two_text = bs4.BeautifulSoup(fox_article_two.text,'html.parser').select('.article-body')
-for element in fox_article_two_text:
-    remove_html_tags_and_sort_words(element,'fox')
-fox_article_three_text = bs4.BeautifulSoup(fox_article_three.text,'html.parser').select('.article-body')
-for element in fox_article_three_text:
-    remove_html_tags_and_sort_words(element,'fox')
+for article in fox_article_list:
+    article_text = bs4.BeautifulSoup(article.text,'html.parser').select('.article-body')
+    for section in article_text:
+        remove_html_tags_and_sort_words(section,'fox')
 
-#Complete Tally of New Yorker Shown Text
-nyr_article_one_shown_text = bs4.BeautifulSoup(nyr_article_one.text,'html.parser').select('.has-dropcap.has-dropcap__lead-standard-heading')
-for element in nyr_article_one_shown_text:
-    remove_html_tags_and_sort_words(element,'nyr')
-nyr_article_two_shown_text = bs4.BeautifulSoup(nyr_article_two.text,'html.parser').select('.has-dropcap.has-dropcap__lead-standard-heading')
-for element in nyr_article_two_shown_text:
-    remove_html_tags_and_sort_words(element,'nyr')
-nyr_article_three_shown_text = bs4.BeautifulSoup(nyr_article_three.text,'html.parser').select('.has-dropcap.has-dropcap__lead-standard-heading')
-for element in nyr_article_three_shown_text:
-    remove_html_tags_and_sort_words(element,'nyr')
-#Complete Tally of New Yorker Paywall Text
-nyr_article_one_paywall_text = bs4.BeautifulSoup(nyr_article_one.text,'html.parser').select('.paywall')
-for element in nyr_article_one_paywall_text:
-    remove_html_tags_and_sort_words(element,'nyr')
-nyr_article_two_paywall_text = bs4.BeautifulSoup(nyr_article_two.text,'html.parser').select('.paywall')
-for element in nyr_article_two_paywall_text:
-    remove_html_tags_and_sort_words(element,'nyr')
-nyr_article_three_paywall_text = bs4.BeautifulSoup(nyr_article_three.text,'html.parser').select('.paywall')
-for element in nyr_article_three_paywall_text:
-    remove_html_tags_and_sort_words(element,'nyr')
+#Complete Tally of New Yorker Shown and Paywall Text
+for article in nyr_article_list:
+    article_text_shown = bs4.BeautifulSoup(article.text,'html.parser').select('.has-dropcap.has-dropcap__lead-standard-heading')
+    article_text_paywall = bs4.BeautifulSoup(article.text,'html.parser').select('.paywall')
+    for section in article_text_shown:
+        remove_html_tags_and_sort_words(section,'nyr')
+    for section in article_text_paywall:
+        remove_html_tags_and_sort_words(section,'nyr')
 
 #Most Popular Words Tally for Fox News
 while len(fox_popular_words) < desired_number_of_words:
