@@ -1,4 +1,3 @@
-#! /usr/bin/python3
 import requests
 import bs4
 import time
@@ -93,7 +92,7 @@ while len(nyr_popular_words) < desired_number_of_words:
         nyr_word_tally.pop(max(nyr_word_tally, key=nyr_word_tally.get))
 
 #Creating an HTML file
-Func = open("/home/pi-guy/Scripts/py-pro/index.html","w")
+Func = open("/home/pi-guy55/scripts/python-data-visualization/index.html","w")
 #Adding input data to the HTML file
 Func.write("""
 <!DOCTYPE html>
