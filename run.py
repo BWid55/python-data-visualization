@@ -7,6 +7,8 @@ start_time = time.time()
 
 #Function to remove html tags while leaving text between them
 def remove_html_tags_and_sort_words(html,source):
+    for script in html.select('script'):
+        script.extract()
     text = re.compile(r"[^\w\s]").sub("",re.compile(r"<[^>]*>").sub("",str(html).lower())).split(" ")
     if source == 'nyr':
         for word in text:
@@ -137,3 +139,4 @@ print("Successful execution on {execution_time} with a duration of {execution_du
 #MORE IDEAS TO BUILD OUT PROJECT
 #Total words in all 3 articles per media source
 #Totals for top words for each media souce
+#Sort sources dynaimcally instead of hardcoding "nyr" and "fox"
