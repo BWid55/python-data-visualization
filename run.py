@@ -12,12 +12,16 @@ def remove_html_tags_and_sort_words(html,source):
     text = re.compile(r"[^\w\s]").sub("",re.compile(r"<[^>]*>").sub("",str(html).lower())).split(" ")
     if source == 'nyr':
         for word in text:
+            global nyr_word_total
+            nyr_word_total += 1
             if word in nyr_word_tally:
                 nyr_word_tally[word] += 1
             else:
                 nyr_word_tally[word] = 1
     elif source == 'fox':
         for word in text:
+            global fox_word_total
+            fox_word_total += 1
             if word in fox_word_tally:
                 fox_word_tally[word] += 1
             else:
@@ -31,6 +35,8 @@ fox_article_links_list = []
 nyr_article_links_list = []
 fox_article_list = []
 nyr_article_list = []
+fox_word_total = 0
+nyr_word_total = 0
 fox_word_tally = {}
 nyr_word_tally = {}
 fox_popular_words = []
@@ -107,6 +113,7 @@ Func.write("""
 </head>
 <body>
     <h1>Stats</h1>
+    <h2>{fox_total} vs {nyr_total}</h2>
     <br>
     <h2>3 Most Popular Fox News Words</h2>
     <p>They are {fox_first}, {fox_second}, and {fox_third}.<p>
@@ -118,7 +125,7 @@ Func.write("""
     <p>Last execution duration: {execution_duration} seconds</p>
 </body>
 </html>
-""".format(fox_first=fox_popular_words[0], fox_second=fox_popular_words[1], fox_third=fox_popular_words[2], nyr_first=nyr_popular_words[0], nyr_second=nyr_popular_words[1], nyr_third=nyr_popular_words[2], execution_time=time.ctime(), execution_duration=(time.time() - start_time)))
+""".format(fox_total=fox_word_total, nyr_total=nyr_word_total, fox_first=fox_popular_words[0], fox_second=fox_popular_words[1], fox_third=fox_popular_words[2], nyr_first=nyr_popular_words[0], nyr_second=nyr_popular_words[1], nyr_third=nyr_popular_words[2], execution_time=time.ctime(), execution_duration=(time.time() - start_time)))
 #Saving the data into the HTML file
 Func.close()
 
@@ -137,6 +144,8 @@ print("Successful execution on {execution_time} with a duration of {execution_du
 
 
 #MORE IDEAS TO BUILD OUT PROJECT
+#Add global tag to objects and add _word_totals back to respective objects
+#Strip words
 #Total words in all 3 articles per media source
 #Totals for top words for each media souce
 #Sort sources dynaimcally instead of hardcoding "nyr" and "fox"
