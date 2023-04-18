@@ -2,6 +2,7 @@ import requests
 import bs4
 import time
 import re
+import copy
 
 start_time = time.time()
 
@@ -13,7 +14,10 @@ def remove_html_tags_and_sort_words(html,source):
     if source == 'nyr':
         for word in text:
             global nyr_word_total
+            global nyr_word_length_total
+            global nyr_word_tally
             nyr_word_total += 1
+            nyr_word_length_total += len(word)
             if word in nyr_word_tally:
                 nyr_word_tally[word] += 1
             else:
@@ -21,7 +25,10 @@ def remove_html_tags_and_sort_words(html,source):
     elif source == 'fox':
         for word in text:
             global fox_word_total
+            global fox_word_length_total
+            global fox_word_tally
             fox_word_total += 1
+            fox_word_length_total += len(word)
             if word in fox_word_tally:
                 fox_word_tally[word] += 1
             else:
@@ -36,7 +43,9 @@ nyr_article_links_list = []
 fox_article_list = []
 nyr_article_list = []
 fox_word_total = 0
+fox_word_length_total = 0
 nyr_word_total = 0
+nyr_word_length_total = 0
 fox_word_tally = {}
 nyr_word_tally = {}
 fox_popular_words = []
@@ -84,20 +93,22 @@ for article in nyr_article_list:
         remove_html_tags_and_sort_words(section,'nyr')
 
 #Most Popular Words Tally for Fox News
+fox_word_tally_copy = copy.copy(fox_word_tally)
 while len(fox_popular_words) < desired_number_of_words:
-    if (max(fox_word_tally, key=fox_word_tally.get) in words_to_not_use):
-        fox_word_tally.pop(max(fox_word_tally, key=fox_word_tally.get))
+    if (max(fox_word_tally_copy, key=fox_word_tally_copy.get) in words_to_not_use):
+        fox_word_tally_copy.pop(max(fox_word_tally_copy, key=fox_word_tally_copy.get))
     else:
-        fox_popular_words.append(max(fox_word_tally, key=fox_word_tally.get))
-        fox_word_tally.pop(max(fox_word_tally, key=fox_word_tally.get))
+        fox_popular_words.append(max(fox_word_tally_copy, key=fox_word_tally_copy.get))
+        fox_word_tally_copy.pop(max(fox_word_tally_copy, key=fox_word_tally_copy.get))
 
 #Most Populars Words Tally for The New Yorker
+nyr_word_tally_copy = copy.copy(nyr_word_tally)
 while len(nyr_popular_words) < desired_number_of_words:
-    if (max(nyr_word_tally, key=nyr_word_tally.get) in words_to_not_use):
-        nyr_word_tally.pop(max(nyr_word_tally, key=nyr_word_tally.get))
+    if (max(nyr_word_tally_copy, key=nyr_word_tally_copy.get) in words_to_not_use):
+        nyr_word_tally_copy.pop(max(nyr_word_tally_copy, key=nyr_word_tally_copy.get))
     else:
-        nyr_popular_words.append(max(nyr_word_tally, key=nyr_word_tally.get))
-        nyr_word_tally.pop(max(nyr_word_tally, key=nyr_word_tally.get))
+        nyr_popular_words.append(max(nyr_word_tally_copy, key=nyr_word_tally_copy.get))
+        nyr_word_tally_copy.pop(max(nyr_word_tally_copy, key=nyr_word_tally_copy.get))
 
 #Creating an HTML file
 Func = open("/home/pi-guy55/scripts/python-data-visualization/index.html","w")
@@ -112,11 +123,13 @@ Func.write("""
     <title>Document</title>
 </head>
 <body>
-    <h1>Stats</h1>
-    <h2>{fox_total} vs {nyr_total}</h2>
+    <h1>Stats: Fox vs. The New Yorker</h1>
+    <h2>{fox_total} total words to {nyr_total} total words.</h2>
+    <p>The average word length was {fox_average_word_length} and {nyr_average_word_length}.</p>
     <br>
     <h2>3 Most Popular Fox News Words</h2>
     <p>They are {fox_first}, {fox_second}, and {fox_third}.<p>
+    <p>The word {fox_first} was used {fox_top_three_popular_words_one_usages} times.</p>
     <br>
     <h2>3 Most Popular The New Yorker Words</h2>
     <p>They are {nyr_first}, {nyr_second}, and {nyr_third}.<p>
@@ -125,7 +138,20 @@ Func.write("""
     <p>Last execution duration: {execution_duration} seconds</p>
 </body>
 </html>
-""".format(fox_total=fox_word_total, nyr_total=nyr_word_total, fox_first=fox_popular_words[0], fox_second=fox_popular_words[1], fox_third=fox_popular_words[2], nyr_first=nyr_popular_words[0], nyr_second=nyr_popular_words[1], nyr_third=nyr_popular_words[2], execution_time=time.ctime(), execution_duration=(time.time() - start_time)))
+""".format(
+fox_total=fox_word_total,
+nyr_total=nyr_word_total,
+fox_average_word_length=round(fox_word_length_total/fox_word_total,2),
+nyr_average_word_length=round(nyr_word_length_total/nyr_word_total,2),
+fox_first=fox_popular_words[0],
+fox_second=fox_popular_words[1],
+fox_third=fox_popular_words[2],
+fox_top_three_popular_words_one_usages=fox_word_tally[fox_popular_words[0]],
+nyr_first=nyr_popular_words[0],
+nyr_second=nyr_popular_words[1],
+nyr_third=nyr_popular_words[2],
+execution_time=time.ctime(),
+execution_duration=round(time.time() - start_time,2)))
 #Saving the data into the HTML file
 Func.close()
 
@@ -135,10 +161,16 @@ print(fox_article_links_list)
 print(nyr_article_links_list)
 print(fox_article_list)
 print(nyr_article_list)
+print(fox_word_total)
+print(nyr_word_total)
+print(fox_word_length_total)
+print(nyr_word_length_total)
 print(fox_word_tally)
 print(nyr_word_tally)
 print(fox_popular_words)
 print(nyr_popular_words)
+print(fox_word_tally[fox_popular_words[0]])
+print(nyr_word_tally[nyr_popular_words[0]])
 '''
 print("Successful execution on {execution_time} with a duration of {execution_duration} seconds.".format(execution_time=time.ctime(), execution_duration=(time.time() - start_time)))
 
